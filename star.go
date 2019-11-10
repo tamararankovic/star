@@ -2,7 +2,7 @@ package main
 
 import (
 	fPb "github.com/c12s/scheme/flusher"
-	"github.com/c12s/star/flusher"
+	"github.com/c12s/star/syncer"
 	actor "github.com/c12s/starsystem"
 	"github.com/golang/protobuf/proto"
 	"strings"
@@ -10,12 +10,12 @@ import (
 
 type StarAgent struct {
 	Conf     *Config
-	f        flusher.Sync
+	f        syncer.Syncer
 	system   *actor.System
 	pointers []string //for faster lookup
 }
 
-func NewStar(c *Config, f flusher.Sync) *StarAgent {
+func NewStar(c *Config, f syncer.Syncer) *StarAgent {
 	return &StarAgent{
 		Conf: c,
 		f:    f,

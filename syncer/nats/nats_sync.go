@@ -1,7 +1,7 @@
 package nats
 
 import (
-	"github.com/c12s/star/flusher"
+	"github.com/c12s/star/syncer"
 	"github.com/nats-io/go-nats"
 )
 
@@ -20,8 +20,12 @@ func NewNatsSync(address string) (*NatsSync, error) {
 	}, nil
 }
 
-func (n *NatsSync) Subscribe(topic string, f flusher.Fn) {
+func (n *NatsSync) Subscribe(topic string, f syncer.Fn) {
 	n.natsConnection.Subscribe(topic, func(msg *nats.Msg) {
 		f(msg.Data)
 	})
+}
+
+func (n *NatsSync) Error(topic string, data []byte) {
+	n.natsConnection.Publish(topic, data)
 }

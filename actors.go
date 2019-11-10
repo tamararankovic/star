@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	bPb "github.com/c12s/scheme/blackhole"
+	"github.com/c12s/star/syncer"
 	actor "github.com/c12s/starsystem"
 )
 
@@ -24,7 +25,9 @@ func (m StarMessage) Params() map[string][]byte {
 //
 // Configs Actor
 //
-type ConfigsActor struct{}
+type ConfigsActor struct {
+	uploader syncer.Uploader
+}
 
 func (m ConfigsActor) Receive(msg interface{}, context *actor.ActorProp) {
 	switch data := msg.(type) {
@@ -39,7 +42,9 @@ func (m ConfigsActor) Receive(msg interface{}, context *actor.ActorProp) {
 //
 // Actions Actor
 //
-type ActionsActor struct{}
+type ActionsActor struct {
+	uploader syncer.Uploader
+}
 
 func (m ActionsActor) Receive(msg interface{}, context *actor.ActorProp) {
 	switch data := msg.(type) {
@@ -54,7 +59,9 @@ func (m ActionsActor) Receive(msg interface{}, context *actor.ActorProp) {
 //
 // Secrets Actor
 //
-type SecretsActor struct{}
+type SecretsActor struct {
+	uploader syncer.Uploader
+}
 
 func (m SecretsActor) Receive(msg interface{}, context *actor.ActorProp) {
 	switch data := msg.(type) {
