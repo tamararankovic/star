@@ -41,4 +41,5 @@ func (n *NatsUploader) Upload(data *fPb.Update) {
 
 func (n *NatsUploader) Error(topic string, data []byte) {
 	n.natsConnection.Publish(topic, data)
+	n.natsConnection.Flush()
 }

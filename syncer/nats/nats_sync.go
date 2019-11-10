@@ -28,4 +28,5 @@ func (n *NatsSync) Subscribe(topic string, f syncer.Fn) {
 
 func (n *NatsSync) Error(topic string, data []byte) {
 	n.natsConnection.Publish(topic, data)
+	n.natsConnection.Flush()
 }
