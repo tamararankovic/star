@@ -2,9 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/c12s/star/flusher/nats"
+	"github.com/c12s/star/syncer/nats"
 	actor "github.com/c12s/starsystem"
 	"runtime"
+)
+
+const (
+	Configs = "configs"
+	Actions = "actions"
+	Secrets = "secrets"
 )
 
 func main() {
@@ -20,12 +26,18 @@ func main() {
 		return
 	}
 
+	uploader, err3 := nats.NewNatsUploader(config.Flusher, config.NodeId, config.STopic, config.ErrTopic)
+	if err2 != nil {
+		fmt.Println(err3)
+		return
+	}
+
 	star := NewStar(config, sync)
 	star.Start(
 		map[string]actor.Actor{
-			"configs": ConfigsActor{},
-			"secrets": SecretsActor{},
-			"actions": ActionsActor{},
+			Configs: ConfigsActor{uploader: uploader},
+			Secrets: SecretsActor{uploader: uploader},
+			Actions: ActionsActor{uploader: uploader},
 		})
 
 	fmt.Println("Starting project star...")
