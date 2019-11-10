@@ -2,26 +2,33 @@ package main
 
 import (
 	"fmt"
-	fPb "github.com/c12s/scheme/flusher"
-	"github.com/golang/protobuf/proto"
-	"github.com/nats-io/go-nats"
+	"github.com/c12s/star/flusher/nats"
+	actor "github.com/c12s/starsystem"
 	"runtime"
 )
 
-const subject = "topology.regions.>"
-
 func main() {
-	natsConnection, _ := nats.Connect("0.0.0.0:4222")
-	natsConnection.Subscribe(subject, func(msg *nats.Msg) {
-		data := fPb.FlushPush{}
-		err := proto.Unmarshal(msg.Data, &data)
-		if err == nil {
-			// Handle the message
-			fmt.Println(data)
-		}
-	})
+	config, err := ConfigFile()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
-	// Keep the connection alive
+	sync, err2 := nats.NewNatsSync(config.Flusher)
+	if err2 != nil {
+		fmt.Println(err2)
+		return
+	}
+
+	star := NewStar(config, sync)
+	star.Start(
+		map[string]actor.Actor{
+			"configs": ConfigsActor{},
+			"secrets": SecretsActor{},
+			"actions": ActionsActor{},
+		})
+
+	fmt.Println("Starting project star...")
 	runtime.Goexit()
-
+	star.Stop()
 }
