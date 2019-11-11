@@ -42,13 +42,13 @@ func (s *StarAgent) Start(actors map[string]actor.Actor) {
 	s.system = actor.NewSystem(s.Conf.NodeId)
 	s.addActors(actors)
 	s.f.Subscribe(s.Conf.RTopic, func(event []byte) {
-		data := fPb.Event{}
-		err := proto.Unmarshal(event, &data)
+		data := &fPb.Event{}
+		err := proto.Unmarshal(event, data)
 		if err == nil {
 			key := s.contains(data.Kind)
 			if key != "" {
 				a := s.system.ActorSelection(key)
-				a.Tell(StarMessage{Data: data.Payload})
+				a.Tell(StarMessage{Data: data})
 			}
 		}
 	})
