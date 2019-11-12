@@ -1,7 +1,9 @@
 star:
   version: v1
-  nodeid: topology.regions.novisad.grbavica.node1
-  rtopic: topology.regions.> 
-  stopic: node_topic
-  errtopic: errortopic
+  nodeid: topology.regions.novisad.grbavica.node3
+  rtopic: topology.regions.novisad.grbavica.node3.> 
+  stopic: syncTopic
+  errtopic: erroTtopic
   flusher: 0.0.0.0:4222
+
+  #topology.regions.>
