@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	bPb "github.com/c12s/scheme/blackhole"
+	fPb "github.com/c12s/scheme/flusher"
 	"github.com/c12s/star/syncer"
 	actor "github.com/c12s/starsystem"
 )
@@ -11,7 +11,7 @@ import (
 // Star Message
 //
 type StarMessage struct {
-	Data []*bPb.Payload
+	Data *fPb.Event
 }
 
 func (m StarMessage) Name() string {
@@ -34,6 +34,12 @@ func (m ConfigsActor) Receive(msg interface{}, context *actor.ActorProp) {
 	case StarMessage:
 		fmt.Println("Received Configs")
 		fmt.Println(data)
+
+		m.uploader.Upload(&fPb.Update{
+			TaskKey: data.Data.TaskKey,
+			Kind:    data.Data.Kind,
+			Node:    m.uploader.NodeId(),
+		})
 	default:
 		fmt.Println("Error")
 	}
@@ -51,6 +57,12 @@ func (m ActionsActor) Receive(msg interface{}, context *actor.ActorProp) {
 	case StarMessage:
 		fmt.Println("Received Actions")
 		fmt.Println(data)
+
+		m.uploader.Upload(&fPb.Update{
+			TaskKey: data.Data.TaskKey,
+			Kind:    data.Data.Kind,
+			Node:    m.uploader.NodeId(),
+		})
 	default:
 		fmt.Println("Error")
 	}
@@ -68,6 +80,12 @@ func (m SecretsActor) Receive(msg interface{}, context *actor.ActorProp) {
 	case StarMessage:
 		fmt.Println("Received Secrets")
 		fmt.Println(data)
+
+		m.uploader.Upload(&fPb.Update{
+			TaskKey: data.Data.TaskKey,
+			Kind:    data.Data.Kind,
+			Node:    m.uploader.NodeId(),
+		})
 	default:
 		fmt.Println("Error")
 	}

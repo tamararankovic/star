@@ -43,3 +43,7 @@ func (n *NatsUploader) Error(topic string, data []byte) {
 	n.natsConnection.Publish(topic, data)
 	n.natsConnection.Flush()
 }
+
+func (n *NatsUploader) NodeId() string {
+	return n.nodeId
+}
