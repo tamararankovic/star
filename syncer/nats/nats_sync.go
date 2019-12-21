@@ -2,7 +2,7 @@ package nats
 
 import (
 	"github.com/c12s/star/syncer"
-	"github.com/nats-io/go-nats"
+	nats "github.com/nats-io/nats.go"
 )
 
 type NatsSync struct {

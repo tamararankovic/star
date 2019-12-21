@@ -5,5 +5,11 @@ star:
   stopic: syncTopic
   errtopic: erroTtopic
   flusher: 0.0.0.0:4222
+  instrument:
+    address: 0.0.0.0:4222
+    stopic: collector
+    collect: 15s
+    location: logs/
+
 
   #topology.regions.>

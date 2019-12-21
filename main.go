@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/c12s/star/syncer/nats"
 	actor "github.com/c12s/starsystem"
+	sg "github.com/c12s/stellar-go"
 	"runtime"
+	"time"
 )
 
 const (
@@ -31,6 +34,20 @@ func main() {
 		fmt.Println(err3)
 		return
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	n, err := sg.NewCollector(config.InstrumentConf["address"], config.InstrumentConf["stopic"])
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	c, err := sg.InitCollector(config.InstrumentConf["location"], n)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	go c.Start(ctx, 15*time.Second)
 
 	star := NewStar(config, sync)
 	star.Start(

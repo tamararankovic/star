@@ -10,12 +10,13 @@ type Star struct {
 }
 
 type Config struct {
-	Version  string `yaml:"version"`
-	NodeId   string `yaml:"nodeid"`
-	RTopic   string `yaml:"rtopic"`
-	STopic   string `yaml:"stopic"`
-	ErrTopic string `yaml:"errtopic"`
-	Flusher  string `yaml:"flusher"`
+	Version        string            `yaml:"version"`
+	NodeId         string            `yaml:"nodeid"`
+	RTopic         string            `yaml:"rtopic"`
+	STopic         string            `yaml:"stopic"`
+	ErrTopic       string            `yaml:"errtopic"`
+	Flusher        string            `yaml:"flusher"`
+	InstrumentConf map[string]string `yaml:"instrument"`
 }
 
 func ConfigFile(n ...string) (*Config, error) {
