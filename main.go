@@ -36,7 +36,6 @@ func main() {
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
 	n, err := sg.NewCollector(config.InstrumentConf["address"], config.InstrumentConf["stopic"])
 	if err != nil {
 		fmt.Println(err)
@@ -60,4 +59,5 @@ func main() {
 	fmt.Println("Starting project star...")
 	runtime.Goexit()
 	star.Stop()
+	cancel()
 }
