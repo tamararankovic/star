@@ -31,7 +31,8 @@ func (s *StarAgent) addActors(actors map[string]actor.Actor) {
 
 func (s *StarAgent) contains(e string) string {
 	for _, a := range s.pointers {
-		if strings.Contains(a, e) {
+		parts := strings.Split(e, ":")
+		if strings.Contains(a, parts[len(parts)-1]) {
 			return a
 		}
 	}
