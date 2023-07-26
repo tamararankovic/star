@@ -22,13 +22,19 @@ services:
     image: star
     container_name: star
     hostname: ${STAR_HOSTNAME}
-    restart: on-failure
     environment:
       - NATS_ADDRESS=${NATS_HOSTNAME}:${NATS_PORT}
       - REGISTRATION_SUBJECT=${REGISTRATION_SUBJECT}
       - REGISTRATION_REQ_TIMEOUT_MILLISECONDS=${REGISTRATION_REQ_TIMEOUT_MILLISECONDS}
+      - MAX_REGISTRATION_RETRIES=${MAX_REGISTRATION_RETRIES}
+      - NODE_ID_DIR_PATH=${NODE_ID_DIR_PATH}
+      - NODE_ID_FILE_NAME=${NODE_ID_FILE_NAME}
     networks:
       - network
+    volumes:
+      - type: bind
+        source: ..
+        target: ${NODE_ID_DIR_PATH}
     depends_on:
       - nats
       - magnetar

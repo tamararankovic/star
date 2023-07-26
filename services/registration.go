@@ -6,24 +6,44 @@ import (
 )
 
 type RegistrationService struct {
-	api domain.RegistrationAPI
+	api        domain.RegistrationAPI
+	nodeIdRepo domain.NodeIdRepo
+	maxRetries int8
 }
 
-func NewRegistrationService(api domain.RegistrationAPI) *RegistrationService {
-	return &RegistrationService{api: api}
+func NewRegistrationService(api domain.RegistrationAPI, nodeIdRepo domain.NodeIdRepo, maxRetries int8) *RegistrationService {
+	return &RegistrationService{
+		api:        api,
+		nodeIdRepo: nodeIdRepo,
+		maxRetries: maxRetries,
+	}
 }
 
-func (rs *RegistrationService) Register() {
+func (rs *RegistrationService) Register() error {
+	var err error
+	for attemptsLeft := rs.maxRetries; attemptsLeft > 0; attemptsLeft-- {
+		err = rs.tryRegister()
+		if err == nil {
+			break
+		}
+		log.Println(err)
+	}
+	return err
+}
+
+func (rs *RegistrationService) tryRegister() error {
+	// todo: generate and send initial labels
 	resp, err := rs.api.Register(domain.RegistrationReq{})
 	if err != nil {
-		log.Println(err)
-		return
+		return err
 	}
 	log.Println(resp.NodeId)
-	// todo: save node id to a file
+	return rs.nodeIdRepo.Put(domain.NodeId{Value: resp.NodeId})
 }
 
 func (rs *RegistrationService) Registered() bool {
-	// todo: check if node id has been assigned
-	return false
+	if _, err := rs.nodeIdRepo.Get(); err != nil {
+		return false
+	}
+	return true
 }
