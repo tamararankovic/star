@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+
+  star:
+    build: .
+    image: star
+    container_name: star
+    hostname: ${STAR_HOSTNAME}
+    restart: on-failure
+    environment:
+      - NATS_ADDRESS=${NATS_HOSTNAME}:${NATS_PORT}
+      - REGISTRATION_SUBJECT=${REGISTRATION_SUBJECT}
+      - REGISTRATION_REQ_TIMEOUT_MILLISECONDS=${REGISTRATION_REQ_TIMEOUT_MILLISECONDS}
+    networks:
+      - network
+    depends_on:
+      - nats
+
+  nats:
+    image: nats:latest
+    container_name: nats
+    hostname: ${NATS_HOSTNAME}
+    restart: on-failure
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
