@@ -2,6 +2,21 @@ version: "3.8"
 
 services:
 
+  magnetar:
+    build:
+      context: ../magnetar
+    image: magnetar
+    container_name: magnetar
+    hostname: ${MAGNETAR_HOSTNAME}
+    restart: on-failure
+    environment:
+      - NATS_ADDRESS=${NATS_HOSTNAME}:${NATS_PORT}
+      - REGISTRATION_SUBJECT=${REGISTRATION_SUBJECT}
+    networks:
+      - network
+    depends_on:
+      - nats
+
   star:
     build: .
     image: star
@@ -16,6 +31,7 @@ services:
       - network
     depends_on:
       - nats
+      - magnetar
 
   nats:
     image: nats:latest
