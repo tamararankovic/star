@@ -5,23 +5,37 @@ type Label interface {
 	Value() interface{}
 }
 
-type BoolLabel struct {
+type label struct {
 	key   string
-	value bool
+	value interface{}
 }
 
 func NewBoolLabel(key string, value bool) Label {
-	return &BoolLabel{
+	return &label{
 		key:   key,
 		value: value,
 	}
 }
 
-func (b BoolLabel) Key() string {
+func NewFloat64Label(key string, value float64) Label {
+	return &label{
+		key:   key,
+		value: value,
+	}
+}
+
+func NewStringLabel(key string, value string) Label {
+	return &label{
+		key:   key,
+		value: value,
+	}
+}
+
+func (b label) Key() string {
 	return b.key
 }
 
-func (b BoolLabel) Value() interface{} {
+func (b label) Value() interface{} {
 	return b.value
 }
 
