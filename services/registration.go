@@ -32,8 +32,10 @@ func (rs *RegistrationService) Register() error {
 }
 
 func (rs *RegistrationService) tryRegister() error {
-	// todo: generate and send initial labels
-	resp, err := rs.api.Register(domain.RegistrationReq{})
+	labels := domain.Labels()
+	resp, err := rs.api.Register(domain.RegistrationReq{
+		Labels: labels,
+	})
 	if err != nil {
 		return err
 	}
