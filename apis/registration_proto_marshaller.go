@@ -7,7 +7,8 @@ import (
 )
 
 func MarshalReq(req domain.RegistrationReq) ([]byte, error) {
-	protoReq, err := RegistrationReq{}.fromDomain(req)
+	protoReq := &RegistrationReq{}
+	protoReq, err := protoReq.fromDomain(req)
 	if err != nil {
 		return nil, err
 	}
@@ -23,10 +24,11 @@ func UnmarshalResp(resp []byte) (*domain.RegistrationResp, error) {
 	return protoResp.toDomain()
 }
 
-func (x RegistrationReq) fromDomain(req domain.RegistrationReq) (*RegistrationReq, error) {
+func (x *RegistrationReq) fromDomain(req domain.RegistrationReq) (*RegistrationReq, error) {
 	var protoLabels []*Label
 	for _, label := range req.Labels {
-		protoLabel, err := Label{}.fromDomain(label)
+		protoLabel := &Label{}
+		protoLabel, err := protoLabel.fromDomain(label)
 		if err != nil {
 			return nil, err
 		}
@@ -37,14 +39,15 @@ func (x RegistrationReq) fromDomain(req domain.RegistrationReq) (*RegistrationRe
 	}, nil
 }
 
-func (x RegistrationResp) toDomain() (*domain.RegistrationResp, error) {
+func (x *RegistrationResp) toDomain() (*domain.RegistrationResp, error) {
 	return &domain.RegistrationResp{
 		NodeId: x.NodeId,
 	}, nil
 }
 
-func (x Label) fromDomain(label domain.Label) (*Label, error) {
-	value, err := Value{}.fromDomain(label.Value())
+func (x *Label) fromDomain(label domain.Label) (*Label, error) {
+	value := &Value{}
+	value, err := value.fromDomain(label.Value())
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +57,7 @@ func (x Label) fromDomain(label domain.Label) (*Label, error) {
 	}, nil
 }
 
-func (x Value) fromDomain(value interface{}) (*Value, error) {
+func (x *Value) fromDomain(value interface{}) (*Value, error) {
 	var marshalled []byte
 	var valueType Value_ValueTYpe
 	var err error
