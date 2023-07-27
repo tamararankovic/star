@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/c12s/magnetar/pkg/magnetar"
 	"github.com/c12s/star/domain"
 	"log"
 )
@@ -32,8 +33,8 @@ func (rs *RegistrationService) Register() error {
 }
 
 func (rs *RegistrationService) tryRegister() error {
-	labels := domain.Labels()
-	resp, err := rs.api.Register(domain.RegistrationReq{
+	labels := labels()
+	resp, err := rs.api.Register(magnetar.RegistrationReq{
 		Labels: labels,
 	})
 	if err != nil {
@@ -48,4 +49,11 @@ func (rs *RegistrationService) Registered() bool {
 		return false
 	}
 	return true
+}
+
+func labels() []magnetar.Label {
+	// todo: replace dummy with real labels
+	label := magnetar.NewBoolLabel("bkey", true)
+	label2 := magnetar.NewStringLabel("skey", "abc")
+	return []magnetar.Label{label, label2}
 }

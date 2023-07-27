@@ -1,6 +1,7 @@
 package startup
 
 import (
+	"github.com/c12s/magnetar/pkg/marshallers/proto"
 	"github.com/c12s/star/apis"
 	"github.com/c12s/star/configs"
 	"github.com/c12s/star/repos"
@@ -12,7 +13,8 @@ func StartApp(config *configs.Config) error {
 	if err != nil {
 		return err
 	}
-	registrationAPI := apis.NewNatsRegistrationAPI(natsConn, config.RegistrationSubject(), config.RegistrationReqTimeoutMilliseconds())
+	marshaller := proto.NewMarshaller()
+	registrationAPI := apis.NewNatsRegistrationAPI(natsConn, config.RegistrationSubject(), config.RegistrationReqTimeoutMilliseconds(), marshaller)
 	nodeIdRepo, err := repos.NewNodeIdFSRepo(config.NodeIdDirPath(), config.NodeIdFileName())
 	if err != nil {
 		return err
