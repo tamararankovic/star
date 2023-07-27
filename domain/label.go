@@ -42,5 +42,6 @@ func (b label) Value() interface{} {
 func Labels() []Label {
 	// todo: replace dummy with real labels
 	label := NewBoolLabel("bkey", true)
-	return []Label{label}
+	label2 := NewStringLabel("skey", "abc")
+	return []Label{label, label2}
 }
