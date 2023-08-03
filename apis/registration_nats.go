@@ -1,6 +1,7 @@
 package apis
 
 import (
+	"github.com/c12s/magnetar/pkg"
 	"github.com/c12s/magnetar/pkg/magnetar"
 	"github.com/c12s/star/domain"
 	"github.com/nats-io/nats.go"
@@ -11,10 +12,10 @@ type natsRegistrationAPI struct {
 	conn                   *nats.Conn
 	registrationReqSubject string
 	reqTimeout             time.Duration
-	marshaller             magnetar.Marshaller
+	marshaller             pkg.Marshaller
 }
 
-func NewNatsRegistrationAPI(conn *nats.Conn, registrationReqSubject string, reqTimeoutMilliseconds int64, marshaller magnetar.Marshaller) domain.RegistrationAPI {
+func NewNatsRegistrationAPI(conn *nats.Conn, registrationReqSubject string, reqTimeoutMilliseconds int64, marshaller pkg.Marshaller) domain.RegistrationAPI {
 	return natsRegistrationAPI{
 		conn:                   conn,
 		registrationReqSubject: registrationReqSubject,

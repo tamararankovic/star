@@ -1,7 +1,7 @@
 package startup
 
 import (
-	"github.com/c12s/magnetar/pkg/marshallers/proto"
+	"github.com/c12s/magnetar/pkg/proto"
 	"github.com/c12s/star/apis"
 	"github.com/c12s/star/configs"
 	"github.com/c12s/star/repos"
