@@ -14,13 +14,15 @@ import (
 type RegistrationService struct {
 	api        domain.RegistrationAPI
 	nodeIdRepo domain.NodeIdRepo
+	nodeIdChan chan string
 	maxRetries int8
 }
 
-func NewRegistrationService(api domain.RegistrationAPI, nodeIdRepo domain.NodeIdRepo, maxRetries int8) *RegistrationService {
+func NewRegistrationService(api domain.RegistrationAPI, nodeIdRepo domain.NodeIdRepo, nodeIdChan chan string, maxRetries int8) *RegistrationService {
 	return &RegistrationService{
 		api:        api,
 		nodeIdRepo: nodeIdRepo,
+		nodeIdChan: nodeIdChan,
 		maxRetries: maxRetries,
 	}
 }
@@ -45,7 +47,7 @@ func (rs *RegistrationService) tryRegister() error {
 	if err != nil {
 		return err
 	}
-	log.Println(resp.NodeId)
+	rs.nodeIdChan <- resp.NodeId
 	return rs.nodeIdRepo.Put(domain.NodeId{Value: resp.NodeId})
 }
 

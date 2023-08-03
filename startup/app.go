@@ -4,6 +4,7 @@ import (
 	"github.com/c12s/magnetar/pkg/proto"
 	"github.com/c12s/star/apis"
 	"github.com/c12s/star/configs"
+	"github.com/c12s/star/handlers"
 	"github.com/c12s/star/repos"
 	"github.com/c12s/star/services"
 )
@@ -19,10 +20,21 @@ func StartApp(config *configs.Config) error {
 	if err != nil {
 		return err
 	}
-	rs := services.NewRegistrationService(registrationAPI, nodeIdRepo, config.MaxRegistrationRetries())
+	var nodeIdChan chan string
+	rs := services.NewRegistrationService(registrationAPI, nodeIdRepo, nodeIdChan, config.MaxRegistrationRetries())
+	configHandler, err := handlers.NewNatsConfigHandler(natsConn, nodeIdRepo)
+	if err != nil {
+		return err
+	}
+	subscriptionClosedCh, err := configHandler.Handle(nodeIdChan)
+	if err != nil {
+		return err
+	}
 	if !rs.Registered() {
 		return rs.Register()
 	}
-	// todo: if registered, subscribe to a subject for receiving config
+
+	<-subscriptionClosedCh
+
 	return nil
 }
