@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/c12s/config/pkg/config"
 	"github.com/c12s/star/domain"
 	"github.com/nats-io/nats.go"
 	"log"
@@ -11,12 +13,14 @@ import (
 type NatsConfigHandler struct {
 	conn       *nats.Conn
 	nodeIdRepo domain.NodeIdRepo
+	marshaller config.Marshaller
 }
 
-func NewNatsConfigHandler(conn *nats.Conn, nodeIdRepo domain.NodeIdRepo) (*NatsConfigHandler, error) {
+func NewNatsConfigHandler(conn *nats.Conn, nodeIdRepo domain.NodeIdRepo, marshaller config.Marshaller) (*NatsConfigHandler, error) {
 	return &NatsConfigHandler{
 		conn:       conn,
 		nodeIdRepo: nodeIdRepo,
+		marshaller: marshaller,
 	}, nil
 }
 
@@ -46,7 +50,16 @@ func (n *NatsConfigHandler) Handle(nodeIdCh chan string) (chan bool, error) {
 }
 
 func (n *NatsConfigHandler) handleNewConfig(msg *nats.Msg) {
-	log.Println("stiglo")
+	group, err := n.marshaller.UnmarshalConfigGroup(msg.Data)
+	if err != nil {
+		log.Println(err)
+	}
+	// todo: remove this later
+	jsonGroup, err := json.Marshal(group)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(string(jsonGroup))
 }
 
 func (n *NatsConfigHandler) subject(nodeId string) string {

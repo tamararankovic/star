@@ -1,7 +1,8 @@
 package startup
 
 import (
-	"github.com/c12s/magnetar/pkg/proto"
+	configProto "github.com/c12s/config/pkg/proto"
+	magnetarProto "github.com/c12s/magnetar/pkg/proto"
 	"github.com/c12s/star/apis"
 	"github.com/c12s/star/configs"
 	"github.com/c12s/star/handlers"
@@ -14,15 +15,16 @@ func StartApp(config *configs.Config) error {
 	if err != nil {
 		return err
 	}
-	marshaller := proto.NewMarshaller()
-	registrationAPI := apis.NewNatsRegistrationAPI(natsConn, config.RegistrationSubject(), config.RegistrationReqTimeoutMilliseconds(), marshaller)
+	registrationMarshaller := magnetarProto.NewMarshaller()
+	registrationAPI := apis.NewNatsRegistrationAPI(natsConn, config.RegistrationSubject(), config.RegistrationReqTimeoutMilliseconds(), registrationMarshaller)
 	nodeIdRepo, err := repos.NewNodeIdFSRepo(config.NodeIdDirPath(), config.NodeIdFileName())
 	if err != nil {
 		return err
 	}
 	var nodeIdChan chan string
 	rs := services.NewRegistrationService(registrationAPI, nodeIdRepo, nodeIdChan, config.MaxRegistrationRetries())
-	configHandler, err := handlers.NewNatsConfigHandler(natsConn, nodeIdRepo)
+	configMarshaller, err := configProto.NewMarshaller()
+	configHandler, err := handlers.NewNatsConfigHandler(natsConn, nodeIdRepo, configMarshaller)
 	if err != nil {
 		return err
 	}

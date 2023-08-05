@@ -4,6 +4,7 @@ go 1.19
 
 require (
 	github.com/c12s/magnetar v1.0.0
+	github.com/c12s/config v1.0.0
 	github.com/nats-io/nats.go v1.28.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 )
@@ -22,7 +23,7 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.3 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sys v0.8.0
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230525234030-28d5490b6b19 // indirect
@@ -31,3 +32,4 @@ require (
 )
 
 replace github.com/c12s/magnetar => ../magnetar
+replace github.com/c12s/config => ../config
