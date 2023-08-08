@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "github.com/c12s/star/pkg/proto";
+
+package proto;
+
+import "config-model.proto";
+
+service StarConfig {
+  rpc GetConfigGroup(GetConfigGroupReq) returns (GetConfigGroupResp) {}
+}
+
+message GetConfigGroupReq {
+  string namespace = 1;
+  string groupName = 2;
+  SubIdentity identity = 3;
+}
+
+message GetConfigGroupResp {
+  ConfigGroup group = 1;
+}
+
+message SubIdentity {
+  string Id = 1;
+  string Kind = 2;
+}
