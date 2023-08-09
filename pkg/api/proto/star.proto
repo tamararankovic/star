@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/c12s/star/pkg/proto";
+option go_package = "github.com/c12s/star/pkg/api";
 
 package proto;
 

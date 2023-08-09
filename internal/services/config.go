@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	oort "github.com/c12s/oort/pkg/proto"
+	oort "github.com/c12s/oort/pkg/api"
 	"github.com/c12s/star/internal/domain"
 )
 
@@ -19,24 +19,6 @@ func NewConfigService(repo domain.ConfigRepo, evaluator oort.OortEvaluatorClient
 }
 
 func (c *ConfigService) Put(req domain.PutConfigGroupReq) (*domain.PutConfigGroupResp, error) {
-	//resp, err := c.evaluator.Authorize(context.TODO(), &oort.AuthorizationReq{
-	//	Subject: &oort.Resource{
-	//		Id:   req.SubId,
-	//		Kind: req.SubKind,
-	//	},
-	//	Object: &oort.Resource{
-	//		Id:   req.Group.Namespace,
-	//		Kind: "namespace",
-	//	},
-	//	PermissionName: "config.put",
-	//})
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if !resp.Allowed {
-	//	return nil, domain.ErrUnauthorized()
-	//}
-
 	err := c.repo.Put(req.Group)
 	if err != nil {
 		return nil, err
@@ -64,7 +46,7 @@ func (c *ConfigService) Get(req domain.GetConfigGroupReq) (*domain.GetConfigGrou
 	if err != nil {
 		return nil, err
 	}
-	if !resp.Allowed {
+	if !resp.Authorized {
 		return nil, domain.ErrUnauthorized()
 	}
 

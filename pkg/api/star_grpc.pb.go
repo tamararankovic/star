@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             v3.12.4
-// source: config.proto
+// source: star.proto
 
-package proto
+package api
 
 import (
 	context "context"
@@ -101,5 +101,5 @@ var StarConfig_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "config.proto",
+	Metadata: "star.proto",
 }

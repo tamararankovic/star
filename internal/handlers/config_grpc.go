@@ -3,33 +3,31 @@ package handlers
 import (
 	"context"
 	"errors"
-	configProto "github.com/c12s/config/pkg/proto"
 	"github.com/c12s/star/internal/domain"
+	"github.com/c12s/star/internal/mappers/proto"
 	"github.com/c12s/star/internal/services"
-	"github.com/c12s/star/pkg/proto"
+	"github.com/c12s/star/pkg/api"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 type starConfigServer struct {
-	proto.UnimplementedStarConfigServer
+	api.UnimplementedStarConfigServer
 	service *services.ConfigService
 }
 
-func NewStarConfigServer(service *services.ConfigService) (proto.StarConfigServer, error) {
+func NewStarConfigServer(service *services.ConfigService) (api.StarConfigServer, error) {
 	return &starConfigServer{
 		service: service,
 	}, nil
 }
 
-func (s starConfigServer) GetConfigGroup(ctx context.Context, req *proto.GetConfigGroupReq) (*proto.GetConfigGroupResp, error) {
-	domainReq := domain.GetConfigGroupReq{
-		GroupName: req.GroupName,
-		Namespace: req.Namespace,
-		SubId:     req.Identity.Id,
-		SubKind:   req.Identity.Kind,
+func (s starConfigServer) GetConfigGroup(ctx context.Context, req *api.GetConfigGroupReq) (*api.GetConfigGroupResp, error) {
+	domainReq, err := proto.GetConfigGroupReqToDomain(req)
+	if err != nil {
+		return nil, err
 	}
-	domainResp, err := s.service.Get(domainReq)
+	domainResp, err := s.service.Get(*domainReq)
 	if err != nil {
 		if errors.Is(err, domain.ErrUnauthorized()) {
 			return nil, status.Error(codes.PermissionDenied, err.Error())
@@ -39,18 +37,6 @@ func (s starConfigServer) GetConfigGroup(ctx context.Context, req *proto.GetConf
 		}
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	resp := &proto.GetConfigGroupResp{
-		Group: &configProto.ConfigGroup{
-			Name:      domainResp.Group.Name,
-			Namespace: domainResp.Group.Namespace,
-		},
-	}
-	for _, domainConfig := range domainResp.Group.Configs {
-		config := &configProto.Config{
-			Key:   domainConfig.Key,
-			Value: domainConfig.Value,
-		}
-		resp.Group.Configs = append(resp.Group.Configs, config)
-	}
+	resp, err := proto.GetConfigGroupRespFromDomain(*domainResp)
 	return resp, nil
 }

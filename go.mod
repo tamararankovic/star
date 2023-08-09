@@ -10,8 +10,6 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible
 )
 
-require github.com/Knetic/govaluate v3.0.0+incompatible // indirect
-
 require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect

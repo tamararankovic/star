@@ -1,9 +1,11 @@
 package startup
 
 import (
-	configProto "github.com/c12s/config/pkg/proto"
-	magnetarProto "github.com/c12s/magnetar/pkg/proto"
-	"github.com/c12s/star/internal/apis"
+	configapi "github.com/c12s/config/pkg/api"
+	magnetarapi "github.com/c12s/magnetar/pkg/api"
+	"github.com/c12s/magnetar/pkg/messaging"
+	"github.com/c12s/magnetar/pkg/messaging/nats"
+
 	"github.com/c12s/star/internal/configs"
 	"github.com/c12s/star/internal/handlers"
 	"github.com/c12s/star/internal/repos"
@@ -19,42 +21,93 @@ func StartApp(config *configs.Config) error {
 	if err != nil {
 		return err
 	}
-	registrationMarshaller := magnetarProto.NewMarshaller()
-	registrationAPI := apis.NewNatsRegistrationAPI(natsConn, config.RegistrationSubject(), config.RegistrationReqTimeoutMilliseconds(), registrationMarshaller)
+
 	nodeIdRepo, err := repos.NewNodeIdFSRepo(config.NodeIdDirPath(), config.NodeIdFileName())
 	if err != nil {
 		return err
 	}
-	var nodeIdChan chan string
-	rs := services.NewRegistrationService(registrationAPI, nodeIdRepo, nodeIdChan, config.MaxRegistrationRetries())
-
 	configRepo, err := repos.NewConfigInMemRepo()
 	if err != nil {
 		return err
 	}
+
+	regReqPublisher, err := nats.NewPublisher(natsConn)
+	if err != nil {
+		return err
+	}
+	regRespSubscriberFactory := func(subject string) messaging.Subscriber {
+		subscriber, _ := nats.NewSubscriber(natsConn, subject, "")
+		return subscriber
+	}
+
 	oortClient, err := newOortClient(config.OortAddress())
+	if err != nil {
+		return err
+	}
+	registrationClient, err := magnetarapi.NewAsyncRegistrationClient(regReqPublisher, regRespSubscriberFactory)
+	if err != nil {
+		return err
+	}
+
 	configService, err := services.NewConfigService(configRepo, oortClient)
-	configMarshaller, err := configProto.NewMarshaller()
-	configNatsHandler, err := handlers.NewNatsConfigHandler(natsConn, nodeIdRepo, configMarshaller, configService)
+	if err != nil {
+		return err
+	}
+
+	var nodeIdChan chan string
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGKILL, syscall.SIGINT)
+
+	go func() {
+		nodeId := <-nodeIdChan
+
+		configSubscriber, err := nats.NewSubscriber(natsConn, configapi.Subject(nodeId), nodeId)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		configClient, err := configapi.NewConfigClient(configSubscriber)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+
+		configNatsHandler, err := handlers.NewConfigHandler(configClient, configService)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		configNatsHandler.Handle()
+
+		<-quit
+
+		err = configSubscriber.Unsubscribe()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
+
+	rs := services.NewRegistrationService(registrationClient, nodeIdRepo, nodeIdChan)
+
 	configGrpcServer, err := handlers.NewStarConfigServer(configService)
 	if err != nil {
 		return err
 	}
-	subscription, err := configNatsHandler.Handle(nodeIdChan)
 	server, err := startServer(config.GrpcServerAddress(), configGrpcServer)
 	if err != nil {
 		return err
 	}
+
 	if !rs.Registered() {
-		return rs.Register()
+		err = rs.Register(config.MaxRegistrationRetries())
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGKILL, syscall.SIGINT)
 	<-quit
 
 	server.GracefulStop()
-	err = subscription.Unsubscribe()
 	if err != nil {
 		log.Println(err)
 	}
