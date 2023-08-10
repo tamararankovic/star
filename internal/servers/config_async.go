@@ -1,4 +1,4 @@
-package handlers
+package servers
 
 import (
 	"errors"
@@ -9,22 +9,22 @@ import (
 	"log"
 )
 
-type ConfigHandler struct {
+type ConfigAsyncServer struct {
 	client  *configapi.ConfigClient
 	service *services.ConfigService
 }
 
-func NewConfigHandler(client *configapi.ConfigClient, service *services.ConfigService) (*ConfigHandler, error) {
+func NewConfigAsyncServer(client *configapi.ConfigClient, service *services.ConfigService) (*ConfigAsyncServer, error) {
 	if client == nil {
 		return nil, errors.New("client is nil")
 	}
-	return &ConfigHandler{
+	return &ConfigAsyncServer{
 		client:  client,
 		service: service,
 	}, nil
 }
 
-func (c *ConfigHandler) Handle() {
+func (c *ConfigAsyncServer) Serve() {
 	err := c.client.ReceiveConfig(func(group *configapi.ConfigGroup) {
 		groupDomain, err := proto.ConfigGroupToDomain(group)
 		if err != nil {
@@ -42,4 +42,8 @@ func (c *ConfigHandler) Handle() {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func (c *ConfigAsyncServer) GracefulStop() {
+	c.client.GracefulStop()
 }

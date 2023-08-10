@@ -8,7 +8,6 @@ WORKDIR /app
 COPY ./star/go.mod ./star/go.sum ./
 
 # Copy the local dependency
-COPY ./messaging ../messaging
 COPY ./magnetar ../magnetar
 COPY ./config ../config
 COPY ./oort ../oort

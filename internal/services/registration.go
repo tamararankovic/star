@@ -11,40 +11,35 @@ import (
 type RegistrationService struct {
 	api        *magnetarapi.AsyncRegistrationClient
 	nodeIdRepo domain.NodeIdRepo
-	nodeIdChan chan string
 }
 
-func NewRegistrationService(api *magnetarapi.AsyncRegistrationClient, nodeIdRepo domain.NodeIdRepo, nodeIdChan chan string) *RegistrationService {
-	nodeId, err := nodeIdRepo.Get()
-	if err == nil {
-		nodeIdChan <- nodeId.Value
-	}
+func NewRegistrationService(api *magnetarapi.AsyncRegistrationClient, nodeIdRepo domain.NodeIdRepo) *RegistrationService {
 	return &RegistrationService{
 		api:        api,
 		nodeIdRepo: nodeIdRepo,
-		nodeIdChan: nodeIdChan,
 	}
 }
 
 func (rs *RegistrationService) Register(maxRetries int8) error {
 	req := rs.buildReq()
 	for attemptsLeft := maxRetries; attemptsLeft > 0; attemptsLeft-- {
-		err := rs.tryRegister(req)
+		var errChan chan error
+		err := rs.tryRegister(req, errChan)
 		if err == nil {
-			return nil
+			err = <-errChan
+			if err == nil {
+				return nil
+			}
 		}
 		log.Println(err)
 	}
 	return errors.New("max registration attempts exceeded")
 }
 
-func (rs *RegistrationService) tryRegister(req *magnetarapi.RegistrationReq) error {
+func (rs *RegistrationService) tryRegister(req *magnetarapi.RegistrationReq, errChan chan<- error) error {
 	err := rs.api.Register(req, func(resp *magnetarapi.RegistrationResp) {
-		rs.nodeIdChan <- resp.NodeId
 		err := rs.nodeIdRepo.Put(domain.NodeId{Value: resp.NodeId})
-		if err != nil {
-			log.Println(err)
-		}
+		errChan <- err
 	})
 	return err
 }
