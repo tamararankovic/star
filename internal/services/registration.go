@@ -9,13 +9,13 @@ import (
 )
 
 type RegistrationService struct {
-	api        *magnetarapi.AsyncRegistrationClient
+	client     *magnetarapi.RegistrationAsyncClient
 	nodeIdRepo domain.NodeIdRepo
 }
 
-func NewRegistrationService(api *magnetarapi.AsyncRegistrationClient, nodeIdRepo domain.NodeIdRepo) *RegistrationService {
+func NewRegistrationService(client *magnetarapi.RegistrationAsyncClient, nodeIdRepo domain.NodeIdRepo) *RegistrationService {
 	return &RegistrationService{
-		api:        api,
+		client:     client,
 		nodeIdRepo: nodeIdRepo,
 	}
 }
@@ -37,7 +37,7 @@ func (rs *RegistrationService) Register(maxRetries int8) error {
 }
 
 func (rs *RegistrationService) tryRegister(req *magnetarapi.RegistrationReq, errChan chan<- error) error {
-	err := rs.api.Register(req, func(resp *magnetarapi.RegistrationResp) {
+	err := rs.client.Register(req, func(resp *magnetarapi.RegistrationResp) {
 		err := rs.nodeIdRepo.Put(domain.NodeId{Value: resp.NodeId})
 		errChan <- err
 	})

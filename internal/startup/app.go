@@ -5,22 +5,18 @@ import (
 	"errors"
 	configapi "github.com/c12s/config/pkg/api"
 	magnetarapi "github.com/c12s/magnetar/pkg/api"
-	"github.com/c12s/magnetar/pkg/messaging"
-	"github.com/c12s/magnetar/pkg/messaging/nats"
 	oortapi "github.com/c12s/oort/pkg/api"
-	"github.com/c12s/star/internal/domain"
-	"github.com/c12s/star/pkg/api"
-	natsgo "github.com/nats-io/nats.go"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-	"net"
-	"sync"
-
 	"github.com/c12s/star/internal/configs"
+	"github.com/c12s/star/internal/domain"
 	"github.com/c12s/star/internal/repos"
 	"github.com/c12s/star/internal/servers"
 	"github.com/c12s/star/internal/services"
+	"github.com/c12s/star/pkg/api"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"log"
+	"net"
+	"sync"
 )
 
 type app struct {
@@ -30,12 +26,9 @@ type app struct {
 	configGrpcServer          api.StarConfigServer
 	configService             *services.ConfigService
 	registrationService       *services.RegistrationService
-	configClient              *configapi.ConfigClient
-	evaluator                 oortapi.OortEvaluatorClient
-	registrator               *magnetarapi.AsyncRegistrationClient
-	publisher                 messaging.Publisher
-	configSubscriber          messaging.Subscriber
-	registrationSubFactory    func(subject string) messaging.Subscriber
+	configClient              *configapi.ConfigAsyncClient
+	evaluatorClient           oortapi.OortEvaluatorClient
+	registrationClient        *magnetarapi.RegistrationAsyncClient
 	nodeIdRepo                domain.NodeIdRepo
 	configRepo                domain.ConfigRepo
 	shutdownProcesses         []func()
@@ -106,10 +99,8 @@ func (a *app) init() {
 		natsConn.Close()
 	})
 
-	a.initNatsPublisher(natsConn)
-	a.initRegistrationNatsSubFactory(natsConn)
 	a.initNodeIdFsRepo()
-	a.initRegistrator()
+	a.initRegistrationClient()
 	a.initRegistrationService()
 
 	if !a.registrationService.Registered() {
@@ -128,8 +119,7 @@ func (a *app) init() {
 	a.initConfigInMemRepo()
 	a.initEvaluatorClient()
 	a.initConfigService()
-	a.initConfigNatsSubscriber(natsConn, nodeId.Value)
-	a.initConfigClient()
+	a.initConfigAsyncClient(nodeId.Value)
 
 	a.initConfigAsyncServer()
 	a.initConfigGrpcServer()
@@ -175,20 +165,20 @@ func (a *app) initRegistrationService() {
 	if a.nodeIdRepo == nil {
 		log.Fatalln("nodeid repo is nil")
 	}
-	if a.registrator == nil {
+	if a.registrationClient == nil {
 		log.Fatalln("registrator is nil")
 	}
-	a.registrationService = services.NewRegistrationService(a.registrator, a.nodeIdRepo)
+	a.registrationService = services.NewRegistrationService(a.registrationClient, a.nodeIdRepo)
 }
 
 func (a *app) initConfigService() {
 	if a.configRepo == nil {
 		log.Fatalln("config repo is nil")
 	}
-	if a.evaluator == nil {
+	if a.evaluatorClient == nil {
 		log.Fatalln("oort evaluator is nil")
 	}
-	service, err := services.NewConfigService(a.configRepo, a.evaluator)
+	service, err := services.NewConfigService(a.configRepo, a.evaluatorClient)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -200,58 +190,23 @@ func (a *app) initEvaluatorClient() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	a.evaluator = client
+	a.evaluatorClient = client
 }
 
-func (a *app) initConfigClient() {
-	if a.configSubscriber == nil {
-		log.Fatalln("config sub is nil")
-	}
-	configClient, err := configapi.NewConfigClient(a.configSubscriber)
+func (a *app) initConfigAsyncClient(nodeId string) {
+	configClient, err := configapi.NewConfigAsyncClient(a.config.NatsAddress(), nodeId)
 	if err != nil {
 		log.Fatalln(err)
 	}
 	a.configClient = configClient
 }
 
-func (a *app) initRegistrator() {
-	if a.publisher == nil {
-		log.Fatalln("publisher is nil")
-	}
-	if a.registrationSubFactory == nil {
-		log.Fatalln("sub factory is nil")
-	}
-	registrator, err := magnetarapi.NewAsyncRegistrationClient(a.publisher, a.registrationSubFactory)
+func (a *app) initRegistrationClient() {
+	client, err := magnetarapi.NewRegistrationAsyncClient(a.config.NatsAddress())
 	if err != nil {
 		log.Fatalln(err)
 	}
-	a.registrator = registrator
-}
-
-func (a *app) initRegistrationNatsSubFactory(conn *natsgo.Conn) {
-	a.registrationSubFactory = func(subject string) messaging.Subscriber {
-		sub, err := nats.NewSubscriber(conn, subject, "")
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return sub
-	}
-}
-
-func (a *app) initNatsPublisher(conn *natsgo.Conn) {
-	publisher, err := nats.NewPublisher(conn)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	a.publisher = publisher
-}
-
-func (a *app) initConfigNatsSubscriber(conn *natsgo.Conn, nodeId string) {
-	subscriber, err := nats.NewSubscriber(conn, configapi.Subject(nodeId), nodeId)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	a.configSubscriber = subscriber
+	a.registrationClient = client
 }
 
 func (a *app) initConfigInMemRepo() {

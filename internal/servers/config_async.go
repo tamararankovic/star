@@ -10,11 +10,11 @@ import (
 )
 
 type ConfigAsyncServer struct {
-	client  *configapi.ConfigClient
+	client  *configapi.ConfigAsyncClient
 	service *services.ConfigService
 }
 
-func NewConfigAsyncServer(client *configapi.ConfigClient, service *services.ConfigService) (*ConfigAsyncServer, error) {
+func NewConfigAsyncServer(client *configapi.ConfigAsyncClient, service *services.ConfigService) (*ConfigAsyncServer, error) {
 	if client == nil {
 		return nil, errors.New("client is nil")
 	}
