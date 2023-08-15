@@ -6,6 +6,7 @@ import (
 	magnetarapi "github.com/c12s/magnetar/pkg/api"
 	"github.com/c12s/star/internal/domain"
 	"log"
+	"strconv"
 )
 
 type RegistrationService struct {
@@ -48,45 +49,45 @@ func (rs *RegistrationService) buildReq() *magnetarapi.RegistrationReq {
 	builder := magnetarapi.NewRegistrationReqBuilder()
 	cpuCores, err := cpuCores()
 	if err == nil {
-		builder = builder.AddFloat64Label("cpuCores", cpuCores)
+		builder = builder.AddFloat64Label("cpu-cores", cpuCores)
 	}
 	for coreId := 0; coreId < int(cpuCores); coreId++ {
-		mhz, err := coreMhz(string(rune(coreId)))
+		mhz, err := coreMhz(strconv.Itoa(coreId))
 		if err == nil {
 			builder = builder.AddFloat64Label(fmt.Sprintf("core%dmhz", coreId), mhz)
 		}
-		vendorId, err := coreVendorId(string(rune(coreId)))
+		vendorId, err := coreVendorId(strconv.Itoa(coreId))
 		if err == nil {
 			builder = builder.AddStringLabel(fmt.Sprintf("core%dvendorId", coreId), vendorId)
 		}
-		model, err := coreModel(string(rune(coreId)))
+		model, err := coreModel(strconv.Itoa(coreId))
 		if err == nil {
 			builder = builder.AddStringLabel(fmt.Sprintf("core%dmodel", coreId), model)
 		}
-		cacheKB, err := coreCacheKB(string(rune(coreId)))
+		cacheKB, err := coreCacheKB(strconv.Itoa(coreId))
 		if err == nil {
 			builder = builder.AddFloat64Label(fmt.Sprintf("core%dcacheKB", coreId), cacheKB)
 		}
 	}
-	fsType, err := FsType()
+	fsType, err := fsType()
 	if err == nil {
-		builder = builder.AddStringLabel("fsType", fsType)
+		builder = builder.AddStringLabel("fs-type", fsType)
 	}
 	diskTotalGB, err := diskTotalGB()
 	if err == nil {
-		builder = builder.AddFloat64Label("diskTotalGB", diskTotalGB)
+		builder = builder.AddFloat64Label("disk-totalGB", diskTotalGB)
 	}
 	diskFreeGB, err := diskFreeGB()
 	if err == nil {
-		builder = builder.AddFloat64Label("diskFreeGB", diskFreeGB)
+		builder = builder.AddFloat64Label("disk-freeGB", diskFreeGB)
 	}
 	kernelArch, err := kernelArch()
 	if err == nil {
-		builder = builder.AddStringLabel("kernelArch", kernelArch)
+		builder = builder.AddStringLabel("kernel-arch", kernelArch)
 	}
 	kernelVersion, err := kernelVersion()
 	if err == nil {
-		builder = builder.AddStringLabel("kernelVersion", kernelVersion)
+		builder = builder.AddStringLabel("kernel-version", kernelVersion)
 	}
 	platform, err := platform()
 	if err == nil {
@@ -94,15 +95,15 @@ func (rs *RegistrationService) buildReq() *magnetarapi.RegistrationReq {
 	}
 	platformFamily, err := platformFamily()
 	if err == nil {
-		builder = builder.AddStringLabel("platformFamily", platformFamily)
+		builder = builder.AddStringLabel("platform-family", platformFamily)
 	}
 	platformVersion, err := platformVersion()
 	if err == nil {
-		builder = builder.AddStringLabel("platformVersion", platformVersion)
+		builder = builder.AddStringLabel("platform-version", platformVersion)
 	}
 	memoryTotalGB, err := memoryTotalGB()
 	if err == nil {
-		builder = builder.AddFloat64Label("memoryTotalGB", memoryTotalGB)
+		builder = builder.AddFloat64Label("memory-totalGB", memoryTotalGB)
 	}
 	return builder.Request()
 }

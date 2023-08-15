@@ -58,7 +58,7 @@ func findCoreById(coreId string) (cpu.InfoStat, error) {
 	return cpu.InfoStat{}, errors.New("core not found")
 }
 
-func FsType() (string, error) {
+func fsType() (string, error) {
 	diskInfo, err := disk.Usage("/")
 	if err != nil {
 		return "", err
