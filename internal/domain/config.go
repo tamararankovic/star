@@ -26,9 +26,7 @@ type ConfigRepo interface {
 }
 
 type PutConfigGroupReq struct {
-	Group   ConfigGroup
-	SubId   string
-	SubKind string
+	Group ConfigGroup
 }
 
 type PutConfigGroupResp struct {

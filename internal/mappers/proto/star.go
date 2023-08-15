@@ -1,7 +1,7 @@
 package proto
 
 import (
-	configapi "github.com/c12s/config/pkg/api"
+	configapi "github.com/c12s/kuiper/pkg/api"
 	"github.com/c12s/star/internal/domain"
 	"github.com/c12s/star/pkg/api"
 )
@@ -25,14 +25,16 @@ func GetConfigGroupRespFromDomain(domainResp domain.GetConfigGroupResp) (*api.Ge
 	}, nil
 }
 
-func ConfigGroupToDomain(group *configapi.ConfigGroup) (*domain.ConfigGroup, error) {
-	resp := &domain.ConfigGroup{
-		Name:      group.Name,
-		Namespace: group.Namespace,
-		Configs:   make([]domain.Config, len(group.Configs)),
+func ApplyConfigCommandToDomain(cmd *configapi.ApplyConfigCommand) (*domain.PutConfigGroupReq, error) {
+	resp := &domain.PutConfigGroupReq{
+		Group: domain.ConfigGroup{
+			Name:      cmd.Group.Name,
+			Namespace: cmd.Namespace,
+			Configs:   make([]domain.Config, len(cmd.Group.Configs)),
+		},
 	}
-	for i, config := range group.Configs {
-		resp.Configs[i] = domain.Config{
+	for i, config := range cmd.Group.Configs {
+		resp.Group.Configs[i] = domain.Config{
 			Key:   config.Key,
 			Value: config.Value,
 		}
@@ -42,8 +44,7 @@ func ConfigGroupToDomain(group *configapi.ConfigGroup) (*domain.ConfigGroup, err
 
 func ConfigGroupFromDomain(domainGroup domain.ConfigGroup) (*configapi.ConfigGroup, error) {
 	group := &configapi.ConfigGroup{
-		Name:      domainGroup.Name,
-		Namespace: domainGroup.Namespace,
+		Name: domainGroup.Name,
 	}
 	for _, domainConfig := range domainGroup.Configs {
 		config := &configapi.Config{

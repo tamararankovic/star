@@ -2,8 +2,7 @@ package servers
 
 import (
 	"errors"
-	configapi "github.com/c12s/config/pkg/api"
-	"github.com/c12s/star/internal/domain"
+	configapi "github.com/c12s/kuiper/pkg/api"
 	"github.com/c12s/star/internal/mappers/proto"
 	"github.com/c12s/star/internal/services"
 	"log"
@@ -25,16 +24,13 @@ func NewConfigAsyncServer(client *configapi.ConfigAsyncClient, service *services
 }
 
 func (c *ConfigAsyncServer) Serve() {
-	err := c.client.ReceiveConfig(func(group *configapi.ConfigGroup) {
-		groupDomain, err := proto.ConfigGroupToDomain(group)
+	err := c.client.ReceiveConfig(func(cmd *configapi.ApplyConfigCommand) {
+		req, err := proto.ApplyConfigCommandToDomain(cmd)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-		req := domain.PutConfigGroupReq{
-			Group: *groupDomain,
-		}
-		_, err = c.service.Put(req)
+		_, err = c.service.Put(*req)
 		if err != nil {
 			log.Println(err)
 		}

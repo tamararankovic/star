@@ -1,4 +1,4 @@
-protoc  -I=../../../../config/pkg/api/proto/ \
+protoc  -I=../../../../kuiper/pkg/api/proto/ \
         --proto_path=./ \
         --go_out=../ \
         --go_opt=paths=source_relative \

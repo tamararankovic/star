@@ -3,7 +3,7 @@ package startup
 import (
 	"context"
 	"errors"
-	configapi "github.com/c12s/config/pkg/api"
+	kuiperapi "github.com/c12s/kuiper/pkg/api"
 	magnetarapi "github.com/c12s/magnetar/pkg/api"
 	oortapi "github.com/c12s/oort/pkg/api"
 	"github.com/c12s/star/internal/configs"
@@ -26,7 +26,7 @@ type app struct {
 	configGrpcServer          api.StarConfigServer
 	configService             *services.ConfigService
 	registrationService       *services.RegistrationService
-	configClient              *configapi.ConfigAsyncClient
+	configClient              *kuiperapi.ConfigAsyncClient
 	evaluatorClient           oortapi.OortEvaluatorClient
 	registrationClient        *magnetarapi.RegistrationAsyncClient
 	nodeIdRepo                domain.NodeIdRepo
@@ -194,7 +194,7 @@ func (a *app) initEvaluatorClient() {
 }
 
 func (a *app) initConfigAsyncClient(nodeId string) {
-	configClient, err := configapi.NewConfigAsyncClient(a.config.NatsAddress(), nodeId)
+	configClient, err := kuiperapi.NewConfigAsyncClient(a.config.NatsAddress(), nodeId)
 	if err != nil {
 		log.Fatalln(err)
 	}

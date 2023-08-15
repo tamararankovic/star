@@ -3,7 +3,7 @@ module github.com/c12s/star
 go 1.19
 
 require (
-	github.com/c12s/config v1.0.0
+	github.com/c12s/kuiper v1.0.0
 	github.com/c12s/magnetar v1.0.0
 	github.com/c12s/oort v1.0.0
 	github.com/nats-io/nats.go v1.28.0
@@ -34,6 +34,6 @@ require (
 
 replace github.com/c12s/magnetar => ../magnetar
 
-replace github.com/c12s/config => ../config
+replace github.com/c12s/kuiper => ../kuiper
 
 replace github.com/c12s/oort => ../oort

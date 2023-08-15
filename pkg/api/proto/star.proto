@@ -4,7 +4,7 @@ option go_package = "github.com/c12s/star/pkg/api";
 
 package proto;
 
-import "config_model.proto";
+import "kuiper_model.proto";
 
 service StarConfig {
   rpc GetConfigGroup(GetConfigGroupReq) returns (GetConfigGroupResp) {}
