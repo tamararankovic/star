@@ -24,7 +24,7 @@ func NewRegistrationService(client *magnetarapi.RegistrationAsyncClient, nodeIdR
 func (rs *RegistrationService) Register(maxRetries int8) error {
 	req := rs.buildReq()
 	for attemptsLeft := maxRetries; attemptsLeft > 0; attemptsLeft-- {
-		var errChan chan error
+		errChan := make(chan error)
 		err := rs.tryRegister(req, errChan)
 		if err == nil {
 			err = <-errChan
@@ -39,8 +39,7 @@ func (rs *RegistrationService) Register(maxRetries int8) error {
 
 func (rs *RegistrationService) tryRegister(req *magnetarapi.RegistrationReq, errChan chan<- error) error {
 	err := rs.client.Register(req, func(resp *magnetarapi.RegistrationResp) {
-		err := rs.nodeIdRepo.Put(domain.NodeId{Value: resp.NodeId})
-		errChan <- err
+		errChan <- rs.nodeIdRepo.Put(domain.NodeId{Value: resp.NodeId})
 	})
 	return err
 }

@@ -7,7 +7,6 @@ import (
 
 type Config struct {
 	natsAddress                        string
-	registrationSubject                string
 	registrationReqTimeoutMilliseconds int64
 	maxRegistrationRetries             int8
 	nodeIdDirPath                      string
@@ -18,10 +17,6 @@ type Config struct {
 
 func (c *Config) NatsAddress() string {
 	return c.natsAddress
-}
-
-func (c *Config) RegistrationSubject() string {
-	return c.registrationSubject
 }
 
 func (c *Config) RegistrationReqTimeoutMilliseconds() int64 {
@@ -56,7 +51,6 @@ func NewFromEnv() (*Config, error) {
 	}
 	return &Config{
 		natsAddress:                        os.Getenv("NATS_ADDRESS"),
-		registrationSubject:                os.Getenv("REGISTRATION_SUBJECT"),
 		registrationReqTimeoutMilliseconds: int64(registrationReqTimeoutMilliseconds),
 		maxRegistrationRetries:             int8(maxRegistrationRetries),
 		nodeIdDirPath:                      os.Getenv("NODE_ID_DIR_PATH"),

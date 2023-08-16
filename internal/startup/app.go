@@ -26,7 +26,7 @@ type app struct {
 	configGrpcServer          api.StarConfigServer
 	configService             *services.ConfigService
 	registrationService       *services.RegistrationService
-	configClient              *kuiperapi.ConfigAsyncClient
+	configClient              *kuiperapi.KuiperAsyncClient
 	evaluatorClient           oortapi.OortEvaluatorClient
 	registrationClient        *magnetarapi.RegistrationAsyncClient
 	nodeIdRepo                domain.NodeIdRepo
@@ -186,7 +186,7 @@ func (a *app) initConfigService() {
 }
 
 func (a *app) initEvaluatorClient() {
-	client, err := newOortClient(a.config.OortAddress())
+	client, err := newOortEvaluatorClient(a.config.OortAddress())
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -194,7 +194,7 @@ func (a *app) initEvaluatorClient() {
 }
 
 func (a *app) initConfigAsyncClient(nodeId string) {
-	configClient, err := kuiperapi.NewConfigAsyncClient(a.config.NatsAddress(), nodeId)
+	configClient, err := kuiperapi.NewKuiperAsyncClient(a.config.NatsAddress(), nodeId)
 	if err != nil {
 		log.Fatalln(err)
 	}

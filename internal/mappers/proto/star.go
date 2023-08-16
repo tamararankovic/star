@@ -8,10 +8,9 @@ import (
 
 func GetConfigGroupReqToDomain(req *api.GetConfigGroupReq) (*domain.GetConfigGroupReq, error) {
 	return &domain.GetConfigGroupReq{
-		GroupName: req.GroupName,
-		Namespace: req.Namespace,
-		SubId:     req.Identity.Id,
-		SubKind:   req.Identity.Kind,
+		GroupId: req.GroupId,
+		SubId:   req.SubId,
+		SubKind: req.SubKind,
 	}, nil
 }
 
@@ -28,12 +27,11 @@ func GetConfigGroupRespFromDomain(domainResp domain.GetConfigGroupResp) (*api.Ge
 func ApplyConfigCommandToDomain(cmd *configapi.ApplyConfigCommand) (*domain.PutConfigGroupReq, error) {
 	resp := &domain.PutConfigGroupReq{
 		Group: domain.ConfigGroup{
-			Name:      cmd.Group.Name,
-			Namespace: cmd.Namespace,
-			Configs:   make([]domain.Config, len(cmd.Group.Configs)),
+			Id:      cmd.Id,
+			Configs: make([]domain.Config, len(cmd.Configs)),
 		},
 	}
-	for i, config := range cmd.Group.Configs {
+	for i, config := range cmd.Configs {
 		resp.Group.Configs[i] = domain.Config{
 			Key:   config.Key,
 			Value: config.Value,
@@ -42,12 +40,12 @@ func ApplyConfigCommandToDomain(cmd *configapi.ApplyConfigCommand) (*domain.PutC
 	return resp, nil
 }
 
-func ConfigGroupFromDomain(domainGroup domain.ConfigGroup) (*configapi.ConfigGroup, error) {
-	group := &configapi.ConfigGroup{
-		Name: domainGroup.Name,
+func ConfigGroupFromDomain(domainGroup domain.ConfigGroup) (*api.NodeConfigGroup, error) {
+	group := &api.NodeConfigGroup{
+		Id: domainGroup.Id,
 	}
 	for _, domainConfig := range domainGroup.Configs {
-		config := &configapi.Config{
+		config := &api.NodeConfig{
 			Key:   domainConfig.Key,
 			Value: domainConfig.Value,
 		}

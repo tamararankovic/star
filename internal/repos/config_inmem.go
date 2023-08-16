@@ -13,7 +13,7 @@ func NewConfigInMemRepo() (domain.ConfigRepo, error) {
 }
 
 func (c configInMemRepo) Put(group domain.ConfigGroup) error {
-	c.groups[group.Id()] = &group
+	c.groups[group.Id] = &group
 	return nil
 }
 

@@ -2,7 +2,6 @@ package domain
 
 import (
 	"errors"
-	"fmt"
 )
 
 type Config struct {
@@ -11,13 +10,8 @@ type Config struct {
 }
 
 type ConfigGroup struct {
-	Name      string
-	Namespace string
-	Configs   []Config
-}
-
-func (c *ConfigGroup) Id() string {
-	return fmt.Sprintf("%s/%s", c.Namespace, c.Name)
+	Id      string
+	Configs []Config
 }
 
 type ConfigRepo interface {
@@ -33,10 +27,9 @@ type PutConfigGroupResp struct {
 }
 
 type GetConfigGroupReq struct {
-	GroupName string
-	Namespace string
-	SubId     string
-	SubKind   string
+	GroupId string
+	SubId   string
+	SubKind string
 }
 
 type GetConfigGroupResp struct {
