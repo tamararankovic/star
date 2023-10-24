@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "github.com/c12s/star/pkg/api";
+package proto;
+
+service StarConfig {
+  rpc GetConfigGroup(GetConfigGroupReq) returns (GetConfigGroupResp) {}
+}
+
+message GetConfigGroupReq {
+  string groupId = 1;
+  string subId = 2;
+  string subKind = 3;
+}
+
+message GetConfigGroupResp {
+  NodeConfigGroup group = 1;
+}
+
+message NodeConfig {
+  string key = 1;
+  string value = 2;
+}
+
+message NodeConfigGroup {
+  string id = 1;
+  repeated NodeConfig configs = 2;
+}
