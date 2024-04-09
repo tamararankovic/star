@@ -22,8 +22,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type StarConfigClient interface {
-	GetStandaloneConfig(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*StandaloneConfig, error)
-	GetConfigGroup(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*ConfigGroup, error)
+	GetStandaloneConfig(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*NodeStandaloneConfig, error)
+	GetConfigGroup(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*NodeConfigGroup, error)
 }
 
 type starConfigClient struct {
@@ -34,8 +34,8 @@ func NewStarConfigClient(cc grpc.ClientConnInterface) StarConfigClient {
 	return &starConfigClient{cc}
 }
 
-func (c *starConfigClient) GetStandaloneConfig(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*StandaloneConfig, error) {
-	out := new(StandaloneConfig)
+func (c *starConfigClient) GetStandaloneConfig(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*NodeStandaloneConfig, error) {
+	out := new(NodeStandaloneConfig)
 	err := c.cc.Invoke(ctx, "/proto.StarConfig/GetStandaloneConfig", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -43,8 +43,8 @@ func (c *starConfigClient) GetStandaloneConfig(ctx context.Context, in *GetReq, 
 	return out, nil
 }
 
-func (c *starConfigClient) GetConfigGroup(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*ConfigGroup, error) {
-	out := new(ConfigGroup)
+func (c *starConfigClient) GetConfigGroup(ctx context.Context, in *GetReq, opts ...grpc.CallOption) (*NodeConfigGroup, error) {
+	out := new(NodeConfigGroup)
 	err := c.cc.Invoke(ctx, "/proto.StarConfig/GetConfigGroup", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -56,8 +56,8 @@ func (c *starConfigClient) GetConfigGroup(ctx context.Context, in *GetReq, opts 
 // All implementations must embed UnimplementedStarConfigServer
 // for forward compatibility
 type StarConfigServer interface {
-	GetStandaloneConfig(context.Context, *GetReq) (*StandaloneConfig, error)
-	GetConfigGroup(context.Context, *GetReq) (*ConfigGroup, error)
+	GetStandaloneConfig(context.Context, *GetReq) (*NodeStandaloneConfig, error)
+	GetConfigGroup(context.Context, *GetReq) (*NodeConfigGroup, error)
 	mustEmbedUnimplementedStarConfigServer()
 }
 
@@ -65,10 +65,10 @@ type StarConfigServer interface {
 type UnimplementedStarConfigServer struct {
 }
 
-func (UnimplementedStarConfigServer) GetStandaloneConfig(context.Context, *GetReq) (*StandaloneConfig, error) {
+func (UnimplementedStarConfigServer) GetStandaloneConfig(context.Context, *GetReq) (*NodeStandaloneConfig, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStandaloneConfig not implemented")
 }
-func (UnimplementedStarConfigServer) GetConfigGroup(context.Context, *GetReq) (*ConfigGroup, error) {
+func (UnimplementedStarConfigServer) GetConfigGroup(context.Context, *GetReq) (*NodeConfigGroup, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetConfigGroup not implemented")
 }
 func (UnimplementedStarConfigServer) mustEmbedUnimplementedStarConfigServer() {}

@@ -21,7 +21,7 @@ func NewStarConfigServer(configs domain.ConfigStore) (api.StarConfigServer, erro
 	}, nil
 }
 
-func (s *starConfigServer) GetStandaloneConfig(ctx context.Context, req *api.GetReq) (*api.StandaloneConfig, error) {
+func (s *starConfigServer) GetStandaloneConfig(ctx context.Context, req *api.GetReq) (*api.NodeStandaloneConfig, error) {
 	config, err := s.configs.GetStandalone(req.Org, req.Name, req.Version, req.Namespace)
 	if err := mapError(err); err != nil {
 		return nil, err
@@ -29,7 +29,7 @@ func (s *starConfigServer) GetStandaloneConfig(ctx context.Context, req *api.Get
 	return proto.StandaloneConfigFromDomain(*config)
 }
 
-func (s *starConfigServer) GetConfigGroup(ctx context.Context, req *api.GetReq) (*api.ConfigGroup, error) {
+func (s *starConfigServer) GetConfigGroup(ctx context.Context, req *api.GetReq) (*api.NodeConfigGroup, error) {
 	config, err := s.configs.GetGroup(req.Org, req.Name, req.Version, req.Namespace)
 	if err := mapError(err); err != nil {
 		return nil, err

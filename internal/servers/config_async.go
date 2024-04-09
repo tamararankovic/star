@@ -26,29 +26,27 @@ func NewConfigAsyncServer(client *kuiperapi.KuiperAsyncClient, configs domain.Co
 
 func (c *ConfigAsyncServer) Serve() {
 	err := c.client.ReceiveConfig(
-		func(cmd *kuiperapi.ApplyStandaloneConfigCommand) {
-			config, err := proto.ApplyStandaloneConfigCommandToDomain(cmd)
+		func(protoConfig *kuiperapi.StandaloneConfig, namespace string) error {
+			config, err := proto.ApplyStandaloneConfigCommandToDomain(protoConfig, namespace)
 			if err != nil {
-				log.Println(err)
-				return
+				return err
 			}
 			putErr := c.configs.PutStandalone(config)
 			if putErr != nil {
-				log.Println(putErr)
+				return errors.New(putErr.Message())
 			}
-			// todo: vrati odgovor o statusu task-a nazad
+			return nil
 		},
-		func(cmd *kuiperapi.ApplyConfigGroupCommand) {
-			config, err := proto.ApplyConfigGroupCommandToDomain(cmd)
+		func(protoConfig *kuiperapi.ConfigGroup, namespace string) error {
+			config, err := proto.ApplyConfigGroupCommandToDomain(protoConfig, namespace)
 			if err != nil {
-				log.Println(err)
-				return
+				return err
 			}
 			putErr := c.configs.PutGroup(config)
 			if putErr != nil {
-				log.Println(putErr)
+				return errors.New(putErr.Message())
 			}
-			// todo: vrati odgovor o statusu task-a nazad
+			return nil
 		})
 	if err != nil {
 		log.Println(err)
