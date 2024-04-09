@@ -3,18 +3,19 @@ package services
 import (
 	"errors"
 	"fmt"
-	magnetarapi "github.com/c12s/magnetar/pkg/api"
-	"github.com/c12s/star/internal/domain"
 	"log"
 	"strconv"
+
+	magnetarapi "github.com/c12s/magnetar/pkg/api"
+	"github.com/c12s/star/internal/domain"
 )
 
 type RegistrationService struct {
 	client     *magnetarapi.RegistrationAsyncClient
-	nodeIdRepo domain.NodeIdRepo
+	nodeIdRepo domain.NodeIdStore
 }
 
-func NewRegistrationService(client *magnetarapi.RegistrationAsyncClient, nodeIdRepo domain.NodeIdRepo) *RegistrationService {
+func NewRegistrationService(client *magnetarapi.RegistrationAsyncClient, nodeIdRepo domain.NodeIdStore) *RegistrationService {
 	return &RegistrationService{
 		client:     client,
 		nodeIdRepo: nodeIdRepo,

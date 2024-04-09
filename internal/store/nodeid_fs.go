@@ -1,26 +1,27 @@
-package repos
+package store
 
 import (
-	"github.com/c12s/star/internal/domain"
 	"os"
 	"path/filepath"
+
+	"github.com/c12s/star/internal/domain"
 )
 
-type nodeIdFSRepo struct {
+type nodeIdFSStore struct {
 	dirPath  string
 	fileName string
 	filePath string
 }
 
-func NewNodeIdFSRepo(dirPath, fileName string) (domain.NodeIdRepo, error) {
-	return &nodeIdFSRepo{
+func NewNodeIdFSStore(dirPath, fileName string) (domain.NodeIdStore, error) {
+	return &nodeIdFSStore{
 		dirPath:  dirPath,
 		fileName: fileName,
 		filePath: dirPath + string(filepath.Separator) + fileName,
 	}, nil
 }
 
-func (n nodeIdFSRepo) Get() (*domain.NodeId, error) {
+func (n nodeIdFSStore) Get() (*domain.NodeId, error) {
 	fileContents, err := os.ReadFile(n.filePath)
 	if err != nil {
 		return nil, err
@@ -30,6 +31,6 @@ func (n nodeIdFSRepo) Get() (*domain.NodeId, error) {
 	}, nil
 }
 
-func (n nodeIdFSRepo) Put(nodeId domain.NodeId) error {
+func (n nodeIdFSStore) Put(nodeId domain.NodeId) error {
 	return os.WriteFile(n.filePath, []byte(nodeId.Value), 0666)
 }

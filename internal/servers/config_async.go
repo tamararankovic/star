@@ -2,39 +2,54 @@ package servers
 
 import (
 	"errors"
-	kuiperapi "github.com/c12s/kuiper/pkg/api"
-	"github.com/c12s/star/internal/mappers/proto"
-	"github.com/c12s/star/internal/services"
 	"log"
+
+	kuiperapi "github.com/c12s/kuiper/pkg/api"
+	"github.com/c12s/star/internal/domain"
+	"github.com/c12s/star/internal/mappers/proto"
 )
 
 type ConfigAsyncServer struct {
 	client  *kuiperapi.KuiperAsyncClient
-	service *services.ConfigService
+	configs domain.ConfigStore
 }
 
-func NewConfigAsyncServer(client *kuiperapi.KuiperAsyncClient, service *services.ConfigService) (*ConfigAsyncServer, error) {
+func NewConfigAsyncServer(client *kuiperapi.KuiperAsyncClient, configs domain.ConfigStore) (*ConfigAsyncServer, error) {
 	if client == nil {
 		return nil, errors.New("client is nil")
 	}
 	return &ConfigAsyncServer{
 		client:  client,
-		service: service,
+		configs: configs,
 	}, nil
 }
 
 func (c *ConfigAsyncServer) Serve() {
-	err := c.client.ReceiveConfig(func(cmd *kuiperapi.ApplyConfigCommand) {
-		req, err := proto.ApplyConfigCommandToDomain(cmd)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		_, err = c.service.Put(*req)
-		if err != nil {
-			log.Println(err)
-		}
-	})
+	err := c.client.ReceiveConfig(
+		func(cmd *kuiperapi.ApplyStandaloneConfigCommand) {
+			config, err := proto.ApplyStandaloneConfigCommandToDomain(cmd)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			putErr := c.configs.PutStandalone(config)
+			if putErr != nil {
+				log.Println(putErr)
+			}
+			// todo: vrati odgovor o statusu task-a nazad
+		},
+		func(cmd *kuiperapi.ApplyConfigGroupCommand) {
+			config, err := proto.ApplyConfigGroupCommandToDomain(cmd)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			putErr := c.configs.PutGroup(config)
+			if putErr != nil {
+				log.Println(putErr)
+			}
+			// todo: vrati odgovor o statusu task-a nazad
+		})
 	if err != nil {
 		log.Println(err)
 	}

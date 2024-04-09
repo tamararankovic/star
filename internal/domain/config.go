@@ -1,50 +1,33 @@
 package domain
 
-import (
-	"errors"
-)
+type ParamSet map[string]string
 
-type Config struct {
-	Key   string
-	Value string
+type NamedParamSet struct {
+	Name string
+	Set  ParamSet
+}
+
+type ConfigBase struct {
+	Org       string
+	Name      string
+	Version   string
+	CreatedAt string
+	Namespace string
+}
+
+type StandaloneConfig struct {
+	ConfigBase
+	Set ParamSet
 }
 
 type ConfigGroup struct {
-	Id      string
-	Configs []Config
+	ConfigBase
+	Sets []NamedParamSet
 }
 
-type ConfigRepo interface {
-	Put(group ConfigGroup) error
-	Get(groupId string) (*ConfigGroup, error)
-}
-
-type PutConfigGroupReq struct {
-	Group ConfigGroup
-}
-
-type PutConfigGroupResp struct {
-}
-
-type GetConfigGroupReq struct {
-	GroupId string
-	SubId   string
-	SubKind string
-}
-
-type GetConfigGroupResp struct {
-	Group ConfigGroup
-}
-
-var (
-	errUnauthorized = errors.New("unauthorized")
-	errNotFound     = errors.New("not found")
-)
-
-func ErrUnauthorized() error {
-	return errUnauthorized
-}
-
-func ErrNotFound() error {
-	return errNotFound
+type ConfigStore interface {
+	PutStandalone(config *StandaloneConfig) *Error
+	GetStandalone(org, name, version, namespace string) (*StandaloneConfig, *Error)
+	PutGroup(config *ConfigGroup) *Error
+	GetGroup(org, name, version, namespace string) (*ConfigGroup, *Error)
 }

@@ -4,7 +4,7 @@ type NodeId struct {
 	Value string
 }
 
-type NodeIdRepo interface {
+type NodeIdStore interface {
 	Get() (*NodeId, error)
 	Put(nodeId NodeId) error
 }
