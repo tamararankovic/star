@@ -4,25 +4,39 @@ option go_package = "github.com/c12s/star/pkg/api";
 package proto;
 
 service StarConfig {
-  rpc GetConfigGroup(GetConfigGroupReq) returns (GetConfigGroupResp) {}
+  rpc GetStandaloneConfig(GetReq) returns (NodeStandaloneConfig) {}
+  rpc GetConfigGroup(GetReq) returns (NodeConfigGroup) {}
 }
 
-message GetConfigGroupReq {
-  string groupId = 1;
-  string subId = 2;
-  string subKind = 3;
+message GetReq {
+  string org = 1;
+  string name = 2;
+  string version = 3;
+  string namespace = 4;
 }
 
-message GetConfigGroupResp {
-  NodeConfigGroup group = 1;
-}
-
-message NodeConfig {
+message NodeParam {
   string key = 1;
   string value = 2;
 }
 
+message NodeNamedParamSet {
+  string name = 1;
+  repeated NodeParam paramSet = 2;
+}
+
+message NodeStandaloneConfig {
+  string organization = 1;
+  string name = 2;
+  string version = 3;
+  string createdAt = 4;
+  repeated NodeParam paramSet = 5;
+}
+
 message NodeConfigGroup {
-  string id = 1;
-  repeated NodeConfig configs = 2;
+  string organization = 1;
+  string name = 2;
+  string version = 3;
+  string createdAt = 4;
+  repeated NodeNamedParamSet paramSets = 5;
 }

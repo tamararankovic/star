@@ -6,50 +6,75 @@ import (
 	"github.com/c12s/star/pkg/api"
 )
 
-func GetConfigGroupReqToDomain(req *api.GetConfigGroupReq) (*domain.GetConfigGroupReq, error) {
-	return &domain.GetConfigGroupReq{
-		GroupId: req.GroupId,
-		SubId:   req.SubId,
-		SubKind: req.SubKind,
-	}, nil
-}
-
-func GetConfigGroupRespFromDomain(domainResp domain.GetConfigGroupResp) (*api.GetConfigGroupResp, error) {
-	group, err := ConfigGroupFromDomain(domainResp.Group)
-	if err != nil {
-		return nil, err
-	}
-	return &api.GetConfigGroupResp{
-		Group: group,
-	}, nil
-}
-
-func ApplyConfigCommandToDomain(cmd *configapi.ApplyConfigCommand) (*domain.PutConfigGroupReq, error) {
-	resp := &domain.PutConfigGroupReq{
-		Group: domain.ConfigGroup{
-			Id:      cmd.Id,
-			Configs: make([]domain.Config, len(cmd.Configs)),
+func ApplyConfigGroupCommandToDomain(config *configapi.ConfigGroup, namespace string) (*domain.ConfigGroup, error) {
+	resp := &domain.ConfigGroup{
+		ConfigBase: domain.ConfigBase{
+			Org:       config.Organization,
+			Name:      config.Name,
+			Version:   config.Version,
+			CreatedAt: config.CreatedAt,
+			Namespace: namespace,
 		},
 	}
-	for i, config := range cmd.Configs {
-		resp.Group.Configs[i] = domain.Config{
-			Key:   config.Key,
-			Value: config.Value,
+	for _, paramSet := range config.ParamSets {
+		set := domain.NamedParamSet{
+			Name: paramSet.Name,
+			Set:  make(domain.ParamSet),
 		}
+		for _, param := range paramSet.ParamSet {
+			set.Set[param.Key] = param.Value
+		}
+		resp.Sets = append(resp.Sets, set)
 	}
+	return resp, nil
+}
+
+func ApplyStandaloneConfigCommandToDomain(config *configapi.StandaloneConfig, namespace string) (*domain.StandaloneConfig, error) {
+	resp := &domain.StandaloneConfig{
+		ConfigBase: domain.ConfigBase{
+			Org:       config.Organization,
+			Name:      config.Name,
+			Version:   config.Version,
+			CreatedAt: config.CreatedAt,
+			Namespace: namespace,
+		},
+		Set: make(domain.ParamSet),
+	}
+	for _, param := range config.ParamSet {
+		resp.Set[param.Key] = param.Value
+	}
+
 	return resp, nil
 }
 
 func ConfigGroupFromDomain(domainGroup domain.ConfigGroup) (*api.NodeConfigGroup, error) {
 	group := &api.NodeConfigGroup{
-		Id: domainGroup.Id,
+		Organization: domainGroup.Org,
+		Name:         domainGroup.Name,
+		Version:      domainGroup.Version,
+		CreatedAt:    domainGroup.CreatedAt,
 	}
-	for _, domainConfig := range domainGroup.Configs {
-		config := &api.NodeConfig{
-			Key:   domainConfig.Key,
-			Value: domainConfig.Value,
+	for _, paramSet := range domainGroup.Sets {
+		set := &api.NodeNamedParamSet{
+			Name: paramSet.Name,
 		}
-		group.Configs = append(group.Configs, config)
+		for key, value := range paramSet.Set {
+			set.ParamSet = append(set.ParamSet, &api.NodeParam{Key: key, Value: value})
+		}
+		group.ParamSets = append(group.ParamSets, set)
 	}
 	return group, nil
+}
+
+func StandaloneConfigFromDomain(domainConfig domain.StandaloneConfig) (*api.NodeStandaloneConfig, error) {
+	config := &api.NodeStandaloneConfig{
+		Organization: domainConfig.Org,
+		Name:         domainConfig.Name,
+		Version:      domainConfig.Version,
+		CreatedAt:    domainConfig.CreatedAt,
+	}
+	for key, value := range domainConfig.Set {
+		config.ParamSet = append(config.ParamSet, &api.NodeParam{Key: key, Value: value})
+	}
+	return config, nil
 }

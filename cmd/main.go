@@ -1,14 +1,13 @@
 package main
 
 import (
-	"context"
-	"github.com/c12s/star/internal/configs"
-	"github.com/c12s/star/internal/startup"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
+
+	"github.com/c12s/star/internal/configs"
+	"github.com/c12s/star/internal/startup"
 )
 
 func main() {
@@ -31,8 +30,5 @@ func main() {
 
 	<-shutdown
 
-	timeout := 10 * time.Second
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
-	defer cancel()
-	app.GracefulStop(ctx)
+	app.GracefulStop()
 }
