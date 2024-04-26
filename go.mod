@@ -36,4 +36,4 @@ replace github.com/c12s/kuiper => ../kuiper
 
 replace github.com/c12s/oort => ../oort
 
-replace iam-service => ../iam-service/iam-service
+replace apollo => ../apollo
