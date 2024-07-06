@@ -105,7 +105,11 @@ func (rs *RegistrationService) buildReq() *magnetarapi.RegistrationReq {
 	if err == nil {
 		builder = builder.AddFloat64Label("memory-totalGB", memoryTotalGB)
 	}
-	return builder.Request()
+	req := builder.Request()
+	req.Resources["mem"] = memoryTotalGB
+	req.Resources["cpu"] = cpuCores
+	req.Resources["disk"] = diskFreeGB
+	return req
 }
 
 func (rs *RegistrationService) Registered() bool {
