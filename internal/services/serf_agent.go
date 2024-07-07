@@ -35,14 +35,14 @@ type SerfAgent struct {
 func NewSerfAgent(cf *configs.Config, nc *nats.Conn, nodeId string, configs domain.ConfigStore) (*SerfAgent, error) {
 	serfConfig := serf.DefaultConfig()
 	serfChannel := make(chan serf.Event)
-	// tags, err := createTags(cf.SerfTag())
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	tags, err := createTags(nodeId)
+	if err != nil {
+		log.Fatal(err)
+	}
 	serfConfig.EventCh = serfChannel
 	// todo: node id
 	serfConfig.NodeName = nodeId
-	// serfConfig.Tags = tags
+	serfConfig.Tags = tags
 	serfConfig.MemberlistConfig.BindAddr = cf.SerfBindAddress()
 	serfConfig.MemberlistConfig.BindPort = cf.SerfBindPort()
 	agent, err := serf.Create(serfConfig)
@@ -268,18 +268,9 @@ func handleUser(ev serf.Event, s *SerfAgent) {
 }
 
 // createTags adds the config tags to the serf agent
-// func createTags(s string) (map[string]string, error) {
-// 	tags := make(map[string]string)
-// 	tagList := strings.Split(s, ",")
-// 	for _, v := range tagList {
-// 		if pair := strings.Split(v, ":"); len(pair) == 2 {
-// 			tags[pair[0]] = pair[1]
-// 		} else {
-// 			return nil, errors.New("wrong tag format")
-// 		}
-// 	}
-// 	return tags, nil
-// }
+func createTags(nodeId string) (map[string]string, error) {
+	return map[string]string{"node_id": nodeId}, nil
+}
 
 // checkTags checks if the serf UserEvent is intended for the serf agent
 // only 1 KV pair can be used for the check
