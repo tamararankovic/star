@@ -80,7 +80,7 @@ func (a *app) init() {
 	}
 	a.serfAgent = agent
 
-	a.clusterJoinListener = services.NewClusterJoinListener(natsConn, a.serfAgent, nodeId.Value)
+	a.clusterJoinListener = services.NewClusterJoinListener(natsConn, a.serfAgent, nodeId.Value, nodeIdStore)
 
 	configClient, err := kuiperapi.NewKuiperAsyncClient(a.config.NatsAddress(), nodeId.Value)
 	if err != nil {
