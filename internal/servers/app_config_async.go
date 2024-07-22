@@ -2,7 +2,9 @@ package servers
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"time"
 
 	meridianapi "github.com/c12s/meridian/pkg/api"
 	"github.com/c12s/star/internal/services"
@@ -27,15 +29,13 @@ func NewAppConfigAsyncServer(client *meridianapi.MeridianAsyncClient, serf *serv
 
 func (c *AppConfigAsyncServer) Serve() {
 	err := c.client.ReceiveConfig(func(orgId, namespaceName, appName, seccompProfile, strategy string, quotas map[string]float64) error {
-		log.Printf("Organization: %s\n", orgId)
-		log.Printf("Namespace: %s\n", namespaceName)
-		log.Printf("Application: %s\n", appName)
-		log.Printf("Resource quotas: %s\n", orgId)
-		log.Printf("Seccomp profile: %s\n", seccompProfile)
+		cmd := fmt.Sprintf("Organization: %s\nNamespace: %s\nApplication: %s\nSeccomp profile: %s\nResource quotas:\n", orgId, namespaceName, appName, seccompProfile)
 		for resource, quota := range quotas {
-			log.Printf("\t%s: %f\n", resource, quota)
+			cmd += fmt.Sprintf("\t%s: %f\n", resource, quota)
 		}
-		return nil
+		log.Println(cmd)
+		eventName := fmt.Sprintf("app_config-%s-%v", c.nodeId, time.Now().Unix())
+		return c.serf.TriggerUserEvent(eventName, cmd, true)
 	})
 	if err != nil {
 		log.Println(err)
