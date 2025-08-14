@@ -23,6 +23,10 @@ func NewRegistrationService(client *magnetarapi.RegistrationAsyncClient, nodeIdR
 }
 
 func (rs *RegistrationService) Register(maxRetries int8, bindAddress string) error {
+	err := rs.nodeIdRepo.PutClusterId("")
+	if err != nil {
+		log.Fatal(err)
+	}
 	req := rs.buildReq(bindAddress)
 	for attemptsLeft := maxRetries; attemptsLeft > 0; attemptsLeft-- {
 		errChan := make(chan error)
